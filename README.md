@@ -14,3 +14,21 @@ To run this application there are 2 steps required:
 `python -m venv techtrend-env`
 `source techtrend-env/bin/activate`
 `pip install -r requirements.txt`
+
+## Docker
+
+### Build the Docker Image
+
+```commandline
+docker build -t techtrends -f Dockerfile .
+```
+
+### Run the Docker Container
+
+```commandline
+docker run -p 3111:3111 techtrends
+docker run -d -p 7111:3111 techtrends
+```
+
+Access the application in the browser using the http://127.0.0.1:7111 endpoint and try to click on some of the available posts, 
+create a new post, access the metrics endpoint, etc.

@@ -1,4 +1,5 @@
 import logging
+import sys
 from datetime import datetime
 
 
@@ -7,7 +8,18 @@ from datetime import datetime
 def logging_message(app):
     def func_wrapper(func):
         """stream logs to app.log file"""
-        logging.basicConfig(filename="app.log", level=logging.DEBUG)
+        # logging.basicConfig(filename="app.log", level=logging.DEBUG)
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+        logger_handler = logging.StreamHandler(sys.stdout)
+        logger_handler.setLevel(logging.DEBUG)
+        logger_formatter = logging.Formatter('%(levelname)s:%(name)s:%(asctime)s %(message)s',
+                                             datefmt='%m/%d/%Y, %I:%M:%S')
+        logger_handler.setFormatter(logger_formatter)
+        logger.addHandler(logger_handler)
+        logger_error_handler = logging.StreamHandler(sys.stderr)
+        logger_error_handler.setLevel(logging.ERROR)
+        logger_error_handler.setFormatter(logger_formatter)
 
         timestamp = datetime.now()
         function_name = func.__name__
