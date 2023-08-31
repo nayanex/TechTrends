@@ -1,7 +1,8 @@
 import sqlite3
 
-from flask import Flask, json, render_template, request, url_for, redirect, flash
+from flask import Flask, json, render_template, jsonify, request, url_for, redirect, flash, g
 from custom_logging import logging_message
+from query_db import get_post_count, get_db_connection_count
 
 
 # Function to get a database connection.
@@ -42,18 +43,15 @@ def healthz():
 @app.route("/metrics", endpoint="metrics")
 @logging_message(app)
 def metrics():
-    response = app.response_class(
-        response=json.dumps(
-            {
-                "status": "success",
-                "code": 0,
-                "data": {"UserCount": 140, "UserCountActive": 23},
-            }
-        ),
-        status=200,
-        mimetype="application/json",
-    )
-    return response
+    post_count = get_post_count()
+    db_connection_count = get_db_connection_count()
+
+    metrics_data = {
+        "db_connection_count": db_connection_count,
+        "post_count": post_count
+    }
+
+    return jsonify(metrics_data), 200
 
 
 # Define the main route of the web application
@@ -101,6 +99,14 @@ def create():
             return redirect(url_for('index'))
 
     return render_template('create.html')
+
+
+@app.teardown_request
+def teardown_request(exception=None):
+    if hasattr(g, 'db_connection'):
+        connection = getattr(g, 'db_connection')
+        connection.close()
+        del g.db_connection
 
 
 # start the application on port 3111
